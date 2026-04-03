@@ -48,7 +48,7 @@ The project provided an excellent opportunity to leverage Next.js API routes not
 > Clone the repository:
 
 ```bash
-git clone https://github.com/maricastroc/kanban-app
+git clone https://github.com/allhailgachuri/WFET---Wallet-Financial-Essentials-Tracker
 ```
 
 > Install the dependencies:
