@@ -1,0 +1,197 @@
+import { useEffect, useState } from "react";
+import { NextSeo } from "next-seo";
+import { useAppContext } from "@/contexts/AppContext";
+import { SummaryCard } from "./partials/SummaryCard";
+import { SearchSection } from "./partials/SearchSection";
+import { TotalBillsCard } from "./partials/TotalBillsCard";
+import { RecurringBillsTable } from "./partials/RecurringBillsTable";
+import { formatToSnakeCase } from "@/utils/formatToSnakeCase";
+import { useLoadingOnRouteChange } from "@/utils/useLoadingOnRouteChange";
+import useRequest from "@/utils/useRequest";
+import { calculateTotalPages } from "@/utils/calculateTotalPages";
+import { useDebounce } from "@/utils/useDebounce";
+import { LoadingPage } from "@/components/shared/LoadingPage";
+import Layout from "@/components/layouts/layout.page";
+import { PaginationSection } from "@/components/shared/PaginationSection/PaginationSection";
+import { PageTitle } from "@/components/shared/PageTitle";
+import { RecurringBillsResult } from "@/types/recurring-bills-result";
+import { MAX_CONTENT_WIDTH } from "@/utils/constants";
+
+export default function RecurringBills() {
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const [maxVisibleButtons, setMaxVisibleButtons] = useState(3);
+
+  const [search, setSearch] = useState("");
+
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  const [selectedSortBy, setSelectedSortBy] = useState("");
+
+  const { isSidebarOpen } = useAppContext();
+
+  const isRouteLoading = useLoadingOnRouteChange();
+
+  useDebounce(
+    () => {
+      setDebouncedSearch(search);
+      setCurrentPage(1);
+    },
+    500,
+    [search]
+  );
+
+  const handleSetSearch = (value: string) => {
+    setSearch(value);
+  };
+
+  const handleSetSelectedSortBy = (value: string) => {
+    setSelectedSortBy(value);
+  };
+
+  const { data, isValidating, mutate } = useRequest<RecurringBillsResult>(
+    {
+      url: `/recurring_bills?page=${currentPage}&limit=10&sortBy=${formatToSnakeCase(
+        selectedSortBy
+      )}&search=${debouncedSearch}`,
+      method: "GET",
+    },
+    {
+      revalidateOnFocus: false,
+      revalidateIfStale: true,
+      dedupingInterval: 20000,
+      focusThrottleInterval: 30000,
+      keepPreviousData: true,
+    }
+  );
+
+  const {
+    data: recurringBillsResume,
+    isValidating: isValidatingResume,
+    mutate: mutateResume,
+  } = useRequest<RecurringBillsResult>(
+    {
+      url: `/recurring_bills/resume`,
+      method: "GET",
+    },
+    {
+      revalidateOnFocus: false,
+      revalidateIfStale: true,
+      dedupingInterval: 20000,
+      focusThrottleInterval: 30000,
+      keepPreviousData: true,
+    }
+  );
+
+  const pagination = data?.pagination || {
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 1,
+  };
+
+  const totalPages = calculateTotalPages(pagination.total, pagination.limit);
+
+  useEffect(() => {
+    const updateMaxVisibleButtons = () => {
+      if (window.innerWidth >= 1024) {
+        setMaxVisibleButtons(6);
+      } else if (window.innerWidth >= 768) {
+        setMaxVisibleButtons(4);
+      } else {
+        setMaxVisibleButtons(3);
+      }
+    };
+
+    updateMaxVisibleButtons();
+    window.addEventListener("resize", updateMaxVisibleButtons);
+    return () => window.removeEventListener("resize", updateMaxVisibleButtons);
+  }, []);
+
+  if (isRouteLoading) {
+    return <LoadingPage />;
+  }
+
+  return (
+    <>
+      <NextSeo
+        title="Recurring Bills | Finance App"
+        additionalMetaTags={[
+          {
+            name: "viewport",
+            content: "width=device-width, initial-scale=1.0",
+          },
+        ]}
+      />
+
+      <Layout>
+        <div
+          role="main"
+          className={`flex w-full flex-col overflow-hidden max-w-${MAX_CONTENT_WIDTH} px-4 py-5 md:p-10 pb-20 md:pb-32 lg:pb-8 lg:pl-0 ${
+            isSidebarOpen ? "lg:pr-10" : "lg:pr-20"
+          }`}
+        >
+          <header className="mb-8">
+            <PageTitle
+              title="Recurring Bills"
+              description="An insight into your recurring bills and their payment statuses."
+            />
+          </header>
+
+          <div className="flex flex-col w-full md:grid lg:grid-cols-[1fr,2fr] md:gap-6">
+            <section
+              aria-label="Recurring bills overview"
+              className="w-full flex flex-col gap-3 md:grid md:grid-cols-2 md:gap-6 lg:flex lg:flex-col lg:gap-6"
+            >
+              <TotalBillsCard recurringBills={recurringBillsResume} />
+
+              <SummaryCard
+                isValidating={isValidating || isValidatingResume}
+                recurringBills={recurringBillsResume}
+              />
+            </section>
+
+            <section
+              aria-labelledby="recurring-bills-list-title"
+              className="mt-5 md:mt-0 flex flex-col bg-white rounded-lg px-5 py-6 md:p-8"
+            >
+              <h2 id="recurring-bills-list-title" className="sr-only">
+                Recurring bills list and filters
+              </h2>
+
+              <SearchSection
+                handleSetSearch={handleSetSearch}
+                handleSetSelectedSortBy={handleSetSelectedSortBy}
+                search={search}
+              />
+
+              <div className="overflow-x-auto w-full">
+                <RecurringBillsTable
+                  recurringBills={data?.bills}
+                  isValidating={isValidating || isValidatingResume}
+                  onSave={async () => {
+                    await mutate();
+                    await mutateResume();
+                  }}
+                />
+              </div>
+
+              {!!data?.bills?.length && (
+                <div className="flex md:px-4 items-center justify-between gap-2 mt-6">
+                  <PaginationSection
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    maxVisibleButtons={maxVisibleButtons}
+                    handleSetCurrentPage={(value: number) =>
+                      setCurrentPage(value)
+                    }
+                  />
+                </div>
+              )}
+            </section>
+          </div>
+        </div>
+      </Layout>
+    </>
+  );
+}

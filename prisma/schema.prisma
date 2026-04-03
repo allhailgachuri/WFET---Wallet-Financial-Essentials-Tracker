@@ -1,0 +1,174 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_DIRECT_URL")
+}
+
+model User {
+  id               String          @id @default(uuid())
+  name             String
+  email            String          @unique
+  password         String?
+  avatarUrl        String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  accountId        String          @unique @default(uuid())
+  currentBalance   Float?
+  
+  transactions     Transaction[]
+  budgets          Budget[]
+  pots             Pot[]
+  recurringBills   RecurringBill[]
+  accounts         Account[]
+  sessions         Session[]
+
+  @@map("users")
+}
+
+model Transaction {
+  id                   String     @id @default(uuid())
+  description          String?
+  amount               Float
+  createdAt            DateTime   @default(now())
+  date                 DateTime   @default(now())
+  isRecurring          Boolean    @default(false)
+  
+  contactName          String
+  contactAvatar        String
+  type                 String
+  
+  categoryId           String?
+  category             Category?  @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  userId               String
+  user                 User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  isRecurringGenerated Boolean    @default(false)
+  recurringBillId      String?
+  recurringBill        RecurringBill? @relation(fields: [recurringBillId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([categoryId])
+  @@index([recurringBillId])
+  @@map("transactions")
+}
+
+model RecurringBill {
+  id                   String     @id @default(uuid())
+  description          String?
+  amount               Float
+  recurrenceDay        Int?
+  recurrenceFrequency  String?
+  contactName          String
+  contactAvatar        String
+  type                 String
+  nextDueDate          DateTime?
+  lastPaidDate         DateTime?
+  baseDate             DateTime   @default(now())
+  
+  categoryId           String?
+  category             Category?  @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  userId               String
+  user                 User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  transactions         Transaction[]
+
+  @@index([userId])
+  @@index([categoryId])
+  @@map("recurring_bills")
+}
+
+model Category {
+  id             String          @id @default(uuid())
+  name           String          @unique
+  transactions   Transaction[]
+  budgets        Budget[]
+  recurringBills RecurringBill[]
+
+  @@map("categories")
+}
+
+model Budget {
+  id         String     @id @default(uuid())
+  amount     Float
+  createdAt  DateTime   @default(now())
+  categoryId String
+  category   Category   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  themeId    String?
+  theme      Theme?     @relation("budgetThemes", fields: [themeId], references: [id], onDelete: SetNull)
+  userId     String
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([categoryId])
+  @@index([themeId])
+  @@map("budgets")
+}
+
+model Pot {
+  id           String   @id @default(uuid())
+  name         String
+  targetAmount Float
+  currentAmount Float   @default(0)
+  createdAt  DateTime   @default(now())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  themeId      String?
+  theme        Theme?   @relation("potThemes", fields: [themeId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([themeId])
+  @@map("pots")
+}
+
+model Theme {
+  id          String   @id @default(uuid())
+  color       String   @unique
+  description String? 
+  budgets     Budget[] @relation("budgetThemes")
+  pots        Pot[]    @relation("potThemes")
+
+  @@map("themes")
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
+}

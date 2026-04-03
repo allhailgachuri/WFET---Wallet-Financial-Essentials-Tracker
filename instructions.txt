@@ -1,0 +1,519 @@
+================================================================================
+         PERSONAL FINANCE APP - COMPLETE LOCAL SETUP GUIDE
+                  For Complete Beginners
+================================================================================
+
+TABLE OF CONTENTS
+================================================================================
+1. What is this project?
+2. System Requirements
+3. Prerequisites & Software Installation
+4. Project Setup Step-by-Step
+5. Environment Variables Explained
+6. Running the Application
+7. Troubleshooting
+8. Next Steps
+
+================================================================================
+1. WHAT IS THIS PROJECT?
+================================================================================
+
+This is a PERSONAL FINANCE APPLICATION - a full-stack financial management 
+tool that helps users track and manage their money. Think of it as a digital 
+finance dashboard where you can:
+
+  • View all your financial data in one place (dashboard)
+  • Manage monthly budgets and spending
+  • Track all your transactions with search and filtering
+  • Create savings goals (called "pots")
+  • Monitor recurring bills (like subscriptions)
+  • Log in with your email, Google, or GitHub account
+  • Upload and edit your profile picture
+
+TECHNOLOGY STACK (What's it built with?):
+  • Frontend (what you see): React, Next.js, Tailwind CSS
+  • Backend (server logic): Next.js API routes
+  • Database (where data is stored): PostgreSQL (via Neon)
+  • Authentication (sign-in): Next-Auth with email/Google/GitHub
+  • Forms & Validation: React Hook Form with Zod
+  • Charts: Recharts (for visual reports)
+
+In simple terms: This is a web application you open in your browser at 
+http://localhost:3000 to manage your finances locally.
+
+================================================================================
+2. SYSTEM REQUIREMENTS
+================================================================================
+
+Before you start, make sure your computer has:
+
+REQUIRED:
+  ✓ Windows 10 or later (you're already on Windows)
+  ✓ At least 8 GB of RAM
+  ✓ At least 2 GB of free disk space
+  ✓ A stable internet connection (for npm packages & database)
+
+OPTIONAL but Recommended:
+  ✓ Git installed (for version control)
+  ✓ A code editor like VS Code
+
+================================================================================
+3. PREREQUISITES & SOFTWARE INSTALLATION
+================================================================================
+
+This section explains what you need to install and how to install it.
+
+---STEP 1: Install Node.js & NPM---
+
+Node.js is a JavaScript runtime that allows you to run JavaScript outside 
+a browser. NPM (Node Package Manager) comes with it and is used to install 
+project dependencies.
+
+HOW TO INSTALL:
+  1. Go to https://nodejs.org/
+  2. Download the "LTS" (Long Term Support) version
+  3. Run the installer
+  4. Click "Next" through all the steps (keep all defaults)
+  5. When finished, RESTART YOUR COMPUTER
+
+VERIFY INSTALLATION:
+  1. Open PowerShell (search for "PowerShell" in Windows Start menu)
+  2. Type: node --version
+  3. Press Enter - You should see something like "v20.x.x"
+  4. Type: npm --version
+  5. You should see something like "10.x.x"
+
+If you see version numbers, you're good! If not, restart your computer 
+and try again.
+
+---STEP 2: Clone/Download the Project---
+
+If you already have the project folder, skip this section.
+
+If you need to get it from GitHub:
+  1. Open PowerShell
+  2. Navigate to where you want the project:
+     cd C:\Users\YourUsername\Desktop
+  3. Clone the repository:
+     git clone https://github.com/maricastroc/kanban-app
+  4. Navigate into the project:
+     cd kanban-app
+
+================================================================================
+4. PROJECT SETUP STEP-BY-STEP
+================================================================================
+
+Follow these steps IN ORDER. Each step is important!
+
+---STEP 1: Open Project in PowerShell---
+
+  1. Open PowerShell
+  2. Navigate to your project folder:
+     cd C:\Users\YourUsername\OneDrive\Documents\Projects\Software Engineering\personal-finance-app
+  
+     (Or use the exact path where your project is located)
+
+  3. Verify you're in the right folder by typing "dir" - you should see 
+     files like package.json, tsconfig.json, etc.
+
+---STEP 2: Install Dependencies---
+
+Dependencies are code libraries that this project needs to run (like 
+building blocks).
+
+In PowerShell, type:
+  npm install
+
+WHAT HAPPENS:
+  • This downloads all the libraries the project needs
+  • It creates a "node_modules" folder (this will be LARGE - 500+ MB)
+  • It may take 5-10 minutes - this is normal, just wait!
+  • You'll see lots of text scrolling - this is normal
+
+SIGN OF SUCCESS:
+  • PowerShell returns to a normal prompt (you can type)
+  • Number of packages installed appears in the output
+  • NO RED ERROR MESSAGES
+
+If you see errors, try:
+  npm cache clean --force
+  npm install
+
+---STEP 3: Set Up Environment Variables---
+
+Environment variables are configuration settings the app needs to run.
+Think of them like a config file with secrets.
+
+CREATE THE .env FILE:
+  1. In your project root folder, look for a file named ".env.example" 
+     (if it exists)
+  2. If it exists, rename it to ".env" (remove the .example part)
+  3. If it doesn't exist, create a new file called ".env" in the root folder
+
+     HOW TO CREATE THE FILE:
+       a. Open Notepad
+       b. Go to File > Save As
+       c. Set "Save as type" to "All Files (*.*)"
+       d. Name it ".env" (with the dot at the start)
+       e. Save it in your project root folder
+
+ADD CONFIGURATION TO .env FILE:
+
+  Open .env in a text editor and add the following content:
+  
+  ====== COPY EVERYTHING BELOW THIS LINE ======
+  
+  # DATABASE CONFIGURATION
+  # You need a PostgreSQL database. Use Neon (it's free)
+  # Go to https://console.neon.tech and create a project
+  # Copy your connection string here
+  DATABASE_URL="postgresql://user:password@host.neon.tech/dbname"
+  DATABASE_DIRECT_URL="postgresql://user:password@host.neon.tech/dbname"
+  
+  # NEXT-AUTH CONFIGURATION
+  # Generate a random secret: You can use: node -e "console.log(math.random().toString(36))"
+  NEXTAUTH_SECRET="your-random-secret-here-change-this"
+  NEXTAUTH_URL="http://localhost:3000"
+  
+  # GOOGLE OAUTH (Optional - for Google login)
+  # Get these from https://console.cloud.google.com
+  GOOGLE_CLIENT_ID="your-google-client-id-here"
+  GOOGLE_CLIENT_SECRET="your-google-client-secret-here"
+  
+  # GITHUB OAUTH (Optional - for GitHub login)
+  # Get these from https://github.com/settings/developers
+  GITHUB_ID="your-github-id-here"
+  GITHUB_SECRET="your-github-secret-here"
+  
+  # DEMO ACCOUNT (For testing without OAuth)
+  NEXT_PUBLIC_DEMO_LOGIN="demo@example.com"
+  NEXT_PUBLIC_DEMO_PASSWORD="demo123"
+  
+  ====== COPY EVERYTHING ABOVE THIS LINE ======
+
+IMPORTANT ENVIRONMENT VARIABLES EXPLAINED:
+
+  DATABASE_URL & DATABASE_DIRECT_URL:
+    • These point to your database (where data is stored)
+    • You need PostgreSQL for this project
+    • Option 1 (RECOMMENDED): Use Neon (free tier available)
+      - Go to https://console.neon.tech
+      - Sign up (free)
+      - Create a new project
+      - Copy the connection string
+      - Paste it into both DATABASE_URL and DATABASE_DIRECT_URL
+    • Option 2: Install PostgreSQL locally (more complex)
+  
+  NEXTAUTH_SECRET:
+    • This is a security key for authentication
+    • Generate one with: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+    • Or just put a random long string like: "abc123def456ghi789jkl012mno345pqr"
+  
+  NEXTAUTH_URL:
+    • Leave as "http://localhost:3000" for local development
+  
+  GOOGLE_CLIENT_ID & GOOGLE_CLIENT_SECRET:
+    • Optional - only needed if you want Google login
+    • To set up:
+      1. Go to https://console.cloud.google.com
+      2. Create a new project
+      3. Enable Google+ API
+      4. Create OAuth 2.0 credentials
+      5. Copy the client ID and secret
+    • If you don't set these, Google login won't work
+  
+  GITHUB_ID & GITHUB_SECRET:
+    • Optional - only needed if you want GitHub login
+    • To set up:
+      1. Go to https://github.com/settings/developers
+      2. Create a new OAuth App
+      3. Copy the client ID and secret
+    • If you don't set these, GitHub login won't work
+  
+  NEXT_PUBLIC_DEMO_LOGIN & NEXT_PUBLIC_DEMO_PASSWORD:
+    • These are demo account credentials for testing
+    • You can log in with email: demo@example.com
+    • Password: demo123 (or whatever you set)
+
+FOR QUICK TESTING (without database):
+  If you just want to test the app quickly, you can use this minimal .env:
+  
+  NEXTAUTH_SECRET="test-secret-12345"
+  NEXTAUTH_URL="http://localhost:3000"
+  DATABASE_URL="postgresql://test:test@localhost:5432/finance"
+  DATABASE_DIRECT_URL="postgresql://test:test@localhost:5432/finance"
+  NEXT_PUBLIC_DEMO_LOGIN="demo@example.com"
+  NEXT_PUBLIC_DEMO_PASSWORD="demo123"
+  
+  BUT you'll still need a working database URL!
+
+---STEP 4: Generate Prisma Client---
+
+Prisma is a tool that connects your app to the database. We need to generate 
+the database client code.
+
+In PowerShell, type:
+  npx prisma generate
+
+WHAT HAPPENS:
+  • It creates code that talks to your database
+  • You'll see "@prisma/client" output
+  • Takes 1-2 minutes
+
+SIGN OF SUCCESS:
+  • You see "Generated Prisma Client" in the output
+
+---STEP 5: Apply Database Migrations---
+
+Migrations are like instructions to create the database tables and structure.
+This command reads the migrations from the "prisma/migrations" folder.
+
+In PowerShell, type:
+  npx prisma migrate dev
+
+WHAT HAPPENS:
+  • It asks you a question: "Enter a name for this migration:"
+  • Just press Enter (or type anything - it doesn't matter)
+  • It creates database tables based on the schema
+  • It might ask to reset the database - say yes (y)
+  • Takes 2-5 minutes
+
+SIGN OF SUCCESS:
+  • You see migration messages
+  • No red ERROR messages
+  • PowerShell returns to normal prompt
+
+WHAT IF IT FAILS?
+  Most common issue: Database connection problem
+  
+  Solutions:
+    1. Check your DATABASE_URL in .env file
+    2. Make sure the database actually exists
+    3. Try: npx prisma migrate reset (this resets everything)
+
+================================================================================
+5. RUNNING THE APPLICATION
+================================================================================
+
+Now that everything is set up, let's run the app!
+
+---START THE DEVELOPMENT SERVER---
+
+In PowerShell, type:
+  npm run dev
+
+WHAT HAPPENS:
+  • Next.js compiles your code
+  • Starts a local server
+  • You'll see messages like:
+      "▲ Next.js 15.0.3"
+      "○ Ready in 3.2s"
+      "○ Local: http://localhost:3000"
+  
+  • Takes 5-10 seconds to start
+
+SIGN OF SUCCESS:
+  • You see "Ready in X.Xs"
+  • PowerShell is still running (doesn't return to prompt)
+  • You see "Local: http://localhost:3000"
+
+---ACCESS THE APPLICATION---
+
+  1. Open your web browser (Chrome, Firefox, Edge, Safari)
+  2. Go to: http://localhost:3000
+  3. The app should load!
+
+YOU SHOULD SEE:
+  • A login page (or dashboard if you're signed in)
+  • The app is fully functional
+  • You can click around and test features
+
+---TO STOP THE SERVER---
+
+In PowerShell:
+  • Press: Ctrl + C (hold Control and press C)
+  • It will ask "Terminate batch job (Y/N)?" - type "y" and press Enter
+  • The server stops, PowerShell returns to normal
+
+================================================================================
+6. TROUBLESHOOTING
+================================================================================
+
+If something goes wrong, read this section.
+
+---PROBLEM: "npm command not found"---
+SOLUTION: 
+  • Node.js isn't installed or not in your PATH
+  • Try restarting your computer
+  • Uninstall and reinstall Node.js from https://nodejs.org/
+
+---PROBLEM: "Cannot find module '@prisma/client'"---
+SOLUTION:
+  • You didn't run "npm install"
+  • Run: npm install
+  • Then: npx prisma generate
+
+---PROBLEM: "Error: Missing DATABASE_URL environment variable"---
+SOLUTION:
+  • Your .env file isn't set up correctly
+  • Make sure:
+    1. You created/renamed .env file
+    2. DATABASE_URL is in the file
+    3. The value is correct
+    4. The .env file is in the root project folder (not in a subfolder)
+
+---PROBLEM: "Cannot connect to database"---
+SOLUTION:
+  • Your database URL is wrong OR database is down
+  • Try:
+    1. Verify DATABASE_URL in .env
+    2. Test the connection manually if possible
+    3. Reset migrations: npx prisma migrate reset
+    4. Check Neon console if using Neon
+
+---PROBLEM: "Port 3000 is already in use"---
+SOLUTION:
+  • Another application is using port 3000
+  • Either:
+    1. Stop the other application
+    2. Or run on a different port: npm run dev -- -p 3001
+       (then visit http://localhost:3001)
+
+---PROBLEM: "npm install takes very long or fails"---
+SOLUTION:
+  • Clear npm cache: npm cache clean --force
+  • Try again: npm install
+  • If still slow, check your internet connection
+
+---PROBLEM: "TypeError: Cannot read property 'prisma' of undefined"---
+SOLUTION:
+  • Prisma client isn't generated
+  • Run: npx prisma generate
+  • Restart the dev server
+
+---PROBLEM: "Page shows blank or only HTML, no styling"---
+SOLUTION:
+  • CSS didn't load (usually temporary)
+  • Refresh the browser (F5)
+  • If still broken, restart the dev server and refresh
+
+================================================================================
+7. QUICK REFERENCE - COMMANDS YOU'LL USE
+================================================================================
+
+Here are the most common commands you'll need:
+
+START DEVELOPMENT SERVER:
+  npm run dev
+  (then visit http://localhost:3000)
+
+STOP DEVELOPMENT SERVER:
+  Ctrl + C in PowerShell
+
+INSTALL DEPENDENCIES (after cloning):
+  npm install
+
+GENERATE PRISMA CLIENT:
+  npx prisma generate
+
+RUN DATABASE MIGRATIONS:
+  npx prisma migrate dev
+
+RESET DATABASE (WARNING: Deletes all data!):
+  npx prisma migrate reset
+
+BUILD FOR PRODUCTION:
+  npm run build
+
+RUN PRODUCTION BUILD:
+  npm start
+
+CHECK FOR LINTING ERRORS:
+  npm run lint
+
+================================================================================
+8. NEXT STEPS
+================================================================================
+
+Now that you have the app running locally, here's what you can do:
+
+EXPLORE THE APP:
+  1. Visit http://localhost:3000
+  2. Log in with the demo account:
+     Email: demo@example.com
+     Password: demo123 (or what you set in .env)
+  3. Click around and explore features
+
+MAKE CHANGES:
+  1. Edit files in the src/ folder
+  2. The app automatically refreshes (hot reload)
+  3. Changes appear immediately in your browser
+
+IMPORTANT FILES TO KNOW:
+  • src/pages/ - Your app pages and API endpoints
+  • src/components/ - Reusable UI components
+  • src/lib/ - Utilities and helper functions
+  • prisma/schema.prisma - Database structure
+  • package.json - Project dependencies
+  • .env - Your configuration (NEVER commit this!)
+
+NEXT LEARNING STEPS:
+  1. Understand the project structure
+  2. Read the Prisma documentation
+  3. Learn Next.js basics
+  4. Explore React documentation
+  5. Set up Google/GitHub login if interested
+
+================================================================================
+FINAL CHECKLIST - Make Sure You've Done All This:
+================================================================================
+
+Before you start developing:
+
+  ☐ Node.js and npm installed (verified with --version)
+  ☐ Project folder cloned/downloaded
+  ☐ npm install completed successfully
+  ☐ .env file created with all required variables
+  ☐ DATABASE_URL is set and valid
+  ☐ npx prisma generate ran successfully
+  ☐ npx prisma migrate dev ran successfully
+  ☐ npm run dev starts the server without errors
+  ☐ http://localhost:3000 loads in your browser
+  ☐ You can log in with demo credentials
+
+If all of these are checked, you're ready to go!
+
+================================================================================
+GETTING HELP
+================================================================================
+
+If you're stuck:
+
+1. READ this document again - most answers are here
+2. Check the error message carefully - it usually tells you what's wrong
+3. Search Google for the error message
+4. Check Node.js and NPM documentation
+5. Check Next.js documentation: https://nextjs.org/docs
+6. Ask in development communities or AI assistants
+
+COMMON RESOURCE LINKS:
+  • Node.js docs: https://nodejs.org/docs/
+  • npm docs: https://docs.npmjs.com/
+  • Next.js docs: https://nextjs.org/docs
+  • React docs: https://react.dev
+  • Prisma docs: https://www.prisma.io/docs/
+  • Tailwind CSS docs: https://tailwindcss.com/docs
+  • Next-Auth docs: https://next-auth.js.org/
+
+================================================================================
+END OF SETUP GUIDE
+================================================================================
+
+Good luck! You've got this! 🚀
+
+If you follow this guide step by step, you WILL get the app running.
+The key is patience and reading error messages carefully.
+
+Feel free to refer back to this guide whenever you're stuck.
+
+================================================================================
